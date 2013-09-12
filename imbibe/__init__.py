@@ -1,16 +1,20 @@
 import collections
+import ujson
 import zmq
 
 class Imbibe(object):
-  def __init__(self, server, port):
-    self.server = server
-    self.port = port
+  def __init__(self, servers):
+    if not isinstance(servers, list):
+      self.servers = [servers]
+    else:
+      self.servers = servers
 
     self.context = zmq.Context()
 
     self.sub_socket = self.context.socket(zmq.SUB)
-    print "tcp://{0}:{1}".format(self.server, self.port)
-    self.sub_socket.connect('tcp://{0}:{1}'.format(self.server, self.port))
+    for server in servers:
+      print "Connect to {0}".format(server)
+      self.sub_socket.connect('tcp://{0}'.format(server))
     self.sub_socket.setsockopt(zmq.SUBSCRIBE, '')
 
     self.poller = zmq.Poller()
@@ -19,7 +23,7 @@ class Imbibe(object):
     self.counters = collections.defaultdict(dict)
 
   def process_metric(self, metric):
-    hostname, app_name, metric_name, metric_type, value, metric_time = metric.split('|')
+    hostname, app_name, metric_name, metric_type, value, metric_time = metric
     value = float(value)
     metric_time = float(metric_time)
     ret_val = value
@@ -44,7 +48,7 @@ class Imbibe(object):
     while self.running:
       socks = dict(self.poller.poll(1000))
       if self.sub_socket in socks and socks[self.sub_socket] == zmq.POLLIN:
-        metric = self.sub_socket.recv()
+        metric = ujson.loads(self.sub_socket.recv())
         yield self.process_metric(metric)
     print "Stop imbibing"
 
@@ -52,7 +56,7 @@ class Imbibe(object):
     self.running = False
 
 if __name__=='__main__':
-  i = Imbibe('127.0.0.1', '5002')
+  i = Imbibe(['127.0.0.1:5002'])
   try:
     for m in i.imbibe():
       print m
