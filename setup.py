@@ -1,8 +1,8 @@
 from distutils.core import setup
 
 setup(name='imbibe',
-    version='0.0.1',
+    version='0.0.2',
     description='Client to stream metrics from multiple Speakeasy servers',
     author='Eric Wong',
-    packages=['imbibe'],
+    py_modules=['imbibe'],
     )
