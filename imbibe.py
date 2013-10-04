@@ -1,6 +1,9 @@
 import collections
+import logging
 import ujson
 import zmq
+
+logger = logging.getLogger(__name__)
 
 class Imbibe(object):
     def __init__(self, servers):
@@ -13,7 +16,7 @@ class Imbibe(object):
 
         self.sub_socket = self.context.socket(zmq.SUB)
         for server in servers:
-            print "Connect to {0}".format(server)
+            logger.info("Connect to {0}".format(server))
             self.sub_socket.connect('tcp://{0}'.format(server))
         self.sub_socket.setsockopt(zmq.SUBSCRIBE, '')
 
