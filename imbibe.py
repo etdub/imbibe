@@ -30,7 +30,7 @@ class Imbibe(object):
             if self.sub_socket in socks and socks[self.sub_socket] == zmq.POLLIN:
                 metrics = ujson.loads(self.sub_socket.recv())
                 for m in metrics:
-                    yield self.__process_metric(metric)
+                    yield self.__process_metric(m)
 
     def stop(self):
         self.running = False
